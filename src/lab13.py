@@ -8,6 +8,8 @@ import sys
 from statistics import NormalDist
 
 import pandas as pd
+from statsmodels.stats.power import NormalIndPower
+from statsmodels.stats.proportion import proportion_effectsize
 
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -271,7 +273,7 @@ def co_mau_hai_ti_le(p1, p2, alpha=0.05, power=0.8):
     return math.ceil(so_hang_tu**2 / (p2 - p1) ** 2)
 
 
-def in_d1():
+def in_d1(reqs):
     print("\nD1 · Cỡ mẫu pilot")
     p1, p2, alpha, power, icc = 0.70, 0.75, 0.05, 0.80, 0.02
     n_5_diem = co_mau_hai_ti_le(p1, p2, alpha, power)
@@ -311,6 +313,56 @@ def in_d1():
         f"n hiệu dụng≈{n_hieu_dung:.0f}."
     )
 
+    effect_size = proportion_effectsize(p1, p2)
+    power_5_diem = NormalIndPower().power(
+        effect_size,
+        nobs1=n_6_diem,
+        alpha=alpha,
+        ratio=1,
+        alternative="two-sided",
+    )
+    ti_le_mo_lai = reqs["mo_lai_trong_7_ngay"].mean()
+    reqs_pham_vi = reqs.loc[
+        reqs["loai"].isin(["noi_dia", "hang_nang"])
+    ]
+    ti_le_mo_lai_pham_vi = reqs_pham_vi["mo_lai_trong_7_ngay"].mean()
+    print(
+        f"Power nếu hiệu ứng thật chỉ +5 điểm tại n={n_6_diem}/nhóm: "
+        f"{power_5_diem:.2f}."
+    )
+    print(
+        f"Mở lại trong 7 ngày: {ti_le_mo_lai:.2%} toàn mẫu "
+        f"({int(reqs['mo_lai_trong_7_ngay'].sum())}/{len(reqs)}); "
+        f"{ti_le_mo_lai_pham_vi:.2%} trong noi_dia + hang_nang "
+        f"({int(reqs_pham_vi['mo_lai_trong_7_ngay'].sum())}/{len(reqs_pham_vi)})."
+    )
+
+
+def in_e1(reqs):
+    print("\nE1 metrics")
+    tong_yeu_cau = len(reqs)
+    thanh_cong_24h = (
+        (reqs["dong_trong_24h"] == 1)
+        & (reqs["mo_lai_trong_7_ngay"] == 0)
+    )
+    duoc_xem_lai = reqs.loc[reqs["duoc_xem_lai"] == 1]
+    sua_hoac_bo = duoc_xem_lai["quyet_dinh_xem_lai"].isin(["sua", "bo"])
+    mo_lai = reqs["mo_lai_trong_7_ngay"] == 1
+    print(
+        f"Chính: đóng trong 24h và không mở lại 7 ngày = "
+        f"{int(thanh_cong_24h.sum())}/{tong_yeu_cau} "
+        f"({thanh_cong_24h.mean():.2%})."
+    )
+    print(
+        f"Dùng: sửa/bỏ gợi ý trong số được xem lại = "
+        f"{int(sua_hoac_bo.sum())}/{len(duoc_xem_lai)} "
+        f"({sua_hoac_bo.mean():.2%})."
+    )
+    print(
+        f"An toàn: mở lại trong 7 ngày = "
+        f"{int(mo_lai.sum())}/{tong_yeu_cau} ({mo_lai.mean():.2%})."
+    )
+
 
 if __name__ == '__main__':
     runs = pd.read_csv('logix_runs.csv')
@@ -329,4 +381,5 @@ if __name__ == '__main__':
     in_a3(runs, reqs)
     in_a4(runs, reqs)
     in_b(runs, reqs, ket_qua)
-    in_d1()
+    in_d1(reqs)
+    in_e1(reqs)
