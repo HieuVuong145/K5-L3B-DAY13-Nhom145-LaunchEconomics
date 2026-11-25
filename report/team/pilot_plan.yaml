@@ -50,7 +50,7 @@ pilot:
     - "NẾU tỉ lệ bỏ qua gợi ý (sua + bo trên số được xem lại) > 40% (đợt chạy thử: 21,1% trong phạm vi) TRONG 1 tuần THÌ Trưởng nhóm CSKH phỏng vấn 5 nhân viên trong 3 ngày và PM trợ lý hoàn phí rà 20 trace bị bỏ KHÔNG THÌ không được chuyển bước rollout"
   interim_looks: "Hằng ngày chỉ kiểm tra chỉ số an toàn và chi phí theo luật dừng; chỉ số chính chỉ đọc một lần vào decision_date"
   rollback: "Giám đốc vận hành bật cờ tắt, hiệu lực trong 30 phút; yêu cầu mới quay về luồng nhân viên tự làm, yêu cầu đang xử lý chuyển cho nhân viên kèm tóm tắt"
-  decision_date: "2027-01-05"     # lịch giả định: bắt đầu 07/12/2026 → 4 người 1 tuần → 10 người 1 tuần → 20 người 10 ngày làm việc
+  decision_date: "2027-01-12"     # lịch giả định: bắt đầu thứ Hai 07/12/2026 → 4 người 1 tuần → 10 người 1 tuần → 20 người 10 ngày làm việc (21/12/2026–04/01/2027, nghỉ 01/01) → chờ đủ 7 ngày theo dõi mở lại của đơn cuối (11/01/2027) → quyết định 12/01/2027
   simulated_inputs:
     - "phut_xem_lai_simulated: 890 phút → 1.780.000 đ"
     - "phut_lam_lai_simulated: 1.132 phút → 2.264.000 đ"
