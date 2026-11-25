@@ -26,6 +26,10 @@
 | `ticket_closed` | Hệ thống ticket | `request_id`, `closed_at`, `trace_id` | Khi đóng ticket |
 | `ticket_reopened` | Hệ thống ticket | `request_id`, `reopened_at`, `reason`, `trace_id` | Khi ticket được mở lại |
 | `audit_sample_checked` | Kế toán | `request_id`, `so_tien_da_hoan`, `so_tien_dung`, `trace_id` | Khi kiểm tra mẫu định kỳ |
+| `staff_rework_completed` | Nhân viên | `request_id`, `staff_id`, `phut_lam_lai`, `ly_do`, `trace_id` | Khi nhân viên làm lại xong một ca trợ lý trả lời sai |
+| `handoff_to_staff` | Agent | `request_id`, `reason` (ví dụ `thieu_du_lieu`, `ngoai_pham_vi`, `het_3_lan`), `tom_tat`, `trace_id` | Khi trợ lý chuyển yêu cầu cho nhân viên |
+| `input_validation_failed` | Agent | `request_id`, `reason` (ví dụ `ma_san_tmdt`), `trace_id` | Khi đầu vào của khách không hợp lệ |
+| `unsupported_input_type` | Agent | `request_id`, `input_type` (ví dụ `audio`), `trace_id` | Khi khách gửi dạng đầu vào trợ lý không xử lý được |
 
 **Kiểm tra chéo:** với mỗi chỉ số ở bảng E1, ghi event dùng để tính. Chỉ số nào không tính được từ danh sách event thì chưa đo được.
 
@@ -34,6 +38,8 @@
 - Tỉ lệ mở lại: `ticket_reopened` trong 7 ngày / `refund_request_created`.
 - Tỉ lệ kích hoạt trợ lý: `agent_suggestion_shown` / yêu cầu được gán `arm=can_thiep` trong `refund_request_created`.
 - Tỉ lệ hoàn sai tiền: so sánh `so_tien_da_hoan` và `so_tien_dung` trong `audit_sample_checked`.
+- Chi phí mỗi việc thành công (luật dừng chi phí trong `pilot_plan.yaml`): token và tool từ `agent_run_completed`, phút xem lại từ `staff_review_decision`, phút làm lại từ `staff_rework_completed`; mẫu số là yêu cầu `ticket_closed` không có `ticket_reopened` trong 7 ngày.
+- Các event dùng ở bảng khắc phục (`bang_loi.md`): `input_validation_failed` (ca 9), `unsupported_input_type` và `handoff_to_staff` (ca 11), `staff_review_decision` (ca 15), `ticket_reopened` (ca 10), `audit_sample_checked` (ca 17).
 
 ## E2 · Rủi ro kinh tế
 
