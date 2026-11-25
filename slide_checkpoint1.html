@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 13 · Checkpoint 1 — Mô hình chi phí mỗi việc thành công</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --primary: #1d4ed8;
+      --primary-soft: #dbeafe;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --danger: #b91c1c;
+      --danger-soft: #fee2e2;
+      --ok: #15803d;
+      --ok-soft: #dcfce7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .deck {
+      width: min(1160px, 95vw);
+      height: min(680px, 86vh);
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      padding: 36px 46px 42px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+      animation: fadeIn 0.22s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide.cover {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 58%, #0f766e 100%);
+      color: #ffffff;
+      justify-content: center;
+      gap: 22px;
+    }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .slide-header h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .tag.sim {
+      background: var(--warn-soft);
+      color: var(--warn);
+      font-size: 12px;
+      padding: 2px 8px;
+    }
+
+    .tag.ok {
+      background: var(--ok-soft);
+      color: var(--ok);
+    }
+
+    .tag.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .cover .tag {
+      background: rgba(255, 255, 255, 0.16);
+      color: #e0f2fe;
+      width: fit-content;
+      font-size: 14px;
+    }
+
+    .cover h1 {
+      font-size: 42px;
+      line-height: 1.18;
+      font-weight: 800;
+      max-width: 880px;
+    }
+
+    .cover p.subtitle {
+      font-size: 20px;
+      color: #cbd5e1;
+      max-width: 780px;
+      line-height: 1.5;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+      max-width: 860px;
+    }
+
+    .meta-card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .meta-card .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #93c5fd;
+      margin-bottom: 4px;
+    }
+
+    .meta-card .val {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .two-col-eq {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .step-card {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--primary);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step-card h3 {
+      font-size: 16px;
+      color: var(--primary);
+    }
+
+    .step-card p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .kpi {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .kpi .k-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .kpi .k-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .kpi .k-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .kpi.warn .k-val { color: var(--warn); }
+    .kpi.danger .k-val { color: var(--danger); }
+    .kpi.ok .k-val { color: var(--ok); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-soft);
+      font-weight: 700;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    td.num, th.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr.highlight {
+      background: #eff6ff;
+      font-weight: 700;
+    }
+
+    tr.danger-row {
+      background: #fef2f2;
+      font-weight: 600;
+    }
+
+    .callout {
+      background: var(--surface-soft);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      font-size: 14.5px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .callout.warn {
+      background: #fffbeb;
+      border-left-color: var(--warn);
+    }
+
+    .callout.danger {
+      background: #fef2f2;
+      border-left-color: var(--danger);
+    }
+
+    .callout.ok {
+      background: #f0fdf4;
+      border-left-color: var(--ok);
+    }
+
+    .formula-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bar-item .bar-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .bar-track {
+      height: 14px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    ul.clean {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    ul.clean li {
+      padding-left: 20px;
+      position: relative;
+    }
+
+    ul.clean li::before {
+      content: "•";
+      position: absolute;
+      left: 4px;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .controls {
+      width: min(1160px, 95vw);
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #cbd5e1;
+      font-size: 13.5px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    button:hover { background: #334155; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .progress-wrap {
+      flex: 1;
+      margin: 0 20px;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #38bdf8;
+      width: 12.5%;
+      transition: width 0.2s ease;
+    }
+
+    code {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+    }
+
+    @media print {
+      body { background: #fff; height: auto; overflow: visible; }
+      .controls { display: none; }
+      .deck { width: 100%; height: auto; }
+      .slide {
+        position: static;
+        display: flex !important;
+        box-shadow: none;
+        border: 1px solid #cbd5e1;
+        page-break-after: always;
+        margin-bottom: 20px;
+        height: 680px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover active">
+      <span class="tag">AI20K K5 · Lab 13 · Launch &amp; Economics (Gate 2a)</span>
+      <h1>Checkpoint 1: Mô hình chi phí mỗi việc thành công (Nhiệm vụ A)</h1>
+      <p class="subtitle">
+        Định giá trợ lý hoàn phí LogiX-VN từ dữ liệu chạy thử 2 tuần (1.200 yêu cầu · 1.624 lần chạy) để trả lời câu hỏi:
+        <strong>Trợ lý có đáng đưa vào kế hoạch pilot không?</strong>
+      </p>
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="label">Nhóm &amp; Lớp</div>
+          <div class="val">Nhóm 145 · Lớp K5-L3B</div>
+        </div>
+        <div class="meta-card">
+          <div class="label">Vai trò 2 · Người kiểm số</div>
+          <div class="val">Nguyễn Tuấn Dũng (2A202603859)</div>
+        </div>
+        <div class="meta-card">
+          <div class="label">Sản phẩm kiểm chứng</div>
+          <div class="val">src/lab13.py &amp; report/team/bang_chi_phi.md</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: WORKFLOW & RULES -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>1. Quy trình thực hiện từ Giai đoạn 0 đến Checkpoint 1</h2>
+        <span class="tag">GĐ 0 → CP1a → CP1b → CP1c</span>
+      </div>
+      <div class="content">
+        <div class="steps">
+          <div class="step-card">
+            <h3>GĐ 0 · Chuẩn bị</h3>
+            <p>Tạo <code>src/.venv</code> (Python 3.11.9), cài <code>pandas, numpy, scipy, statsmodels, pyyaml</code>. Nắm 6 công thức &amp; bộ đơn giá giả định.</p>
+          </div>
+          <div class="step-card">
+            <h3>CP1a · Bước 1A</h3>
+            <p>Tính tay &amp; kiểm tra 3 phép thử A1 (<code>1,20 · 1,25 · 1,25</code>). Xác nhận <code>src/lab13.py</code> in <strong>ĐẠT</strong> trước khi tính tiếp.</p>
+          </div>
+          <div class="step-card">
+            <h3>CP1b · Bước 1B</h3>
+            <p>Kiểm tra hàm <code>mo_hinh()</code> trên 1.200 yêu cầu &amp; 1.624 lần chạy. Điền đủ 9 dòng bảng <strong>A2</strong> và 2 câu phân tích.</p>
+          </div>
+          <div class="step-card">
+            <h3>CP1c · Bước 1C</h3>
+            <p>Phân tách 4 loại yêu cầu (<strong>A3</strong>), kiểm tra hiệu quả chạy lại theo <code>attempt</code> và cộng chi phí cố định 40 triệu đ/tháng (<strong>A4</strong>).</p>
+          </div>
+        </div>
+
+        <div class="two-col-eq">
+          <div class="callout">
+            <strong>Nguyên tắc kiểm số cốt lõi:</strong><br />
+            • Đọc CSV bắt buộc có <code>keep_default_na=False</code> để không lỗi ô trống.<br />
+            • <strong>Tử số</strong> tính <em>mọi</em> lần chạy (kể cả lần lỗi); <strong>mẫu số</strong> chỉ đếm yêu cầu <code>ket_qua == 'thanh_cong'</code> (978 ca).
+          </div>
+          <div class="callout warn">
+            <strong>Bộ đơn giá giả định (LogiX-VN):</strong><br />
+            • Token vào: <strong>26 đ</strong>/1k · Token ra: <strong>130 đ</strong>/1k · Tool: <strong>15 đ</strong>/lần.<br />
+            • Nhân viên: <strong>2.000 đ/phút</strong> (tự làm 1 yêu cầu = 6 phút = <strong>12.000 đ</strong>).<br />
+            • Chi phí cố định trợ lý: <strong>40 triệu đ/tháng</strong>.
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Lab 13 · Nhóm 145 (K5-L3B)</span>
+        <span>Slide 2 / 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: A1 -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>2. Nhiệm vụ A1 · Ba phép thử đáp án biết trước</h2>
+        <span class="tag ok">Cổng kiểm tra 1A: ĐẠT 3/3</span>
+      </div>
+      <div class="content">
+        <div class="two-col">
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Phép thử (xác suất đúng mỗi lần p = 0,8)</th>
+                  <th class="num">Công thức</th>
+                  <th class="num">Kết quả</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Số lần chạy trung bình, tối đa 2 lần</td>
+                  <td class="num">(1 − 0,2²) ÷ 0,8</td>
+                  <td class="num"><strong>1,20</strong></td>
+                </tr>
+                <tr>
+                  <td>Số lần chạy trung bình, chạy đến khi đúng</td>
+                  <td class="num">1 ÷ 0,8</td>
+                  <td class="num"><strong>1,25</strong></td>
+                </tr>
+                <tr class="highlight">
+                  <td>Hệ số chi phí mỗi việc thành công, tối đa 3 lần</td>
+                  <td class="num">E[chạy] ÷ P(thành công)</td>
+                  <td class="num"><strong>1,25</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="callout ok" style="margin-top: 16px;">
+              <strong>Kết quả chạy <code>src/lab13.py</code>:</strong><br />
+              <code>Ba phép thử đáp án biết trước: ĐẠT</code> — khớp 100% với tính tay, đủ điều kiện bước sang tính trên dữ liệu thật (A2).
+            </div>
+          </div>
+
+          <div class="formula-box">
+            # Công thức cốt lõi A1<br />
+            E[số lần chạy] = (1 - (1 - p)^k) / p<br />
+            P(thành công)  = 1 - (1 - p)^k<br /><br />
+            # Hệ số chi phí mỗi việc thành công:<br />
+            Hệ số = E[số lần chạy] / P(thành công)<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= 1 / p  (k bị triệt tiêu!)<br /><br />
+            # Với p = 0.8:<br />
+            1 / 0.8 = 1.25 lần giá một lần chạy
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Đối chiếu: src/lab13.py &amp; report/team/bang_chi_phi.md (Mục A1)</span>
+        <span>Slide 3 / 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: A2 -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>3. Nhiệm vụ A2 · Mô hình chi phí từ trace</h2>
+        <span class="tag sim">Có số liệu simulated</span>
+      </div>
+      <div class="content">
+        <div class="two-col">
+          <table>
+            <thead>
+              <tr>
+                <th>Khoản mục</th>
+                <th class="num">Giá trị</th>
+                <th>Nhãn</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Token (mọi lần chạy)</td><td class="num">245.585 đ</td><td>đo từ trace</td></tr>
+              <tr><td>Tool (5.600 lần gọi)</td><td class="num">84.000 đ</td><td>đo từ trace</td></tr>
+              <tr><td><em>Trong đó: lần chạy thứ 2 và 3</em></td><td class="num"><em>93.804 đ</em></td><td>đo từ trace</td></tr>
+              <tr><td>Xem lại (890 phút)</td><td class="num">1.780.000 đ</td><td><span class="tag sim">simulated</span></td></tr>
+              <tr><td>Làm lại (1.132 phút)</td><td class="num">2.264.000 đ</td><td><span class="tag sim">simulated</span></td></tr>
+              <tr class="highlight"><td>Tổng chi phí</td><td class="num">4.373.585 đ</td><td><span class="tag sim">simulated</span></td></tr>
+              <tr><td>Số việc thành công</td><td class="num">978</td><td>đo từ trace</td></tr>
+              <tr class="highlight"><td>Chi phí mỗi việc thành công</td><td class="num">4.472 đ</td><td><span class="tag sim">simulated</span></td></tr>
+              <tr><td>Hoá đơn token + tool / yêu cầu</td><td class="num">274,7 đ</td><td>đo từ trace</td></tr>
+            </tbody>
+          </table>
+
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="kpi warn">
+              <div class="k-label">So với "hoá đơn chia số yêu cầu" (274,7 đ)</div>
+              <div class="k-val">Gấp 16,3 lần</div>
+              <div class="k-sub">4.472 đ [simulated] ÷ 274,7 đ</div>
+            </div>
+
+            <div class="bar-group">
+              <div class="bar-item">
+                <div class="bar-top"><span>Làm lại [simulated]</span><span>51,8%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:51.8%; background:#dc2626;"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Xem lại [simulated]</span><span>40,7%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:40.7%; background:#d97706;"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Token + Tool (trace)</span><span>7,5%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:7.5%; background:#2563eb;"></div></div>
+              </div>
+            </div>
+
+            <div class="callout">
+              <strong>Phát hiện chính:</strong> Giờ nhân viên (làm lại + xem lại) chiếm tới <strong>92,5%</strong> tổng chi phí [simulated], không phải tiền API.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Nguồn: logix_runs.csv (1.624 dòng) &amp; logix_requests.csv (1.200 dòng)</span>
+        <span>Slide 4 / 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: A3 PART 1 -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>4. Nhiệm vụ A3 · Chi phí tách theo 4 loại yêu cầu</h2>
+        <span class="tag sim">CPS: simulated</span>
+      </div>
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th>Loại yêu cầu</th>
+              <th class="num">Số yêu cầu</th>
+              <th class="num">Tỉ lệ thành công</th>
+              <th class="num">Lần chạy / YC</th>
+              <th class="num">Chi phí / việc thành công [simulated]</th>
+              <th class="num">So với 12.000 đ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="highlight">
+              <td><code>noi_dia</code></td>
+              <td class="num">824</td>
+              <td class="num">95,0%</td>
+              <td class="num">1,11</td>
+              <td class="num">2.696 đ [simulated]</td>
+              <td class="num"><strong>0,22×</strong></td>
+            </tr>
+            <tr>
+              <td><code>hang_nang</code></td>
+              <td class="num">158</td>
+              <td class="num">74,1%</td>
+              <td class="num">1,47</td>
+              <td class="num">8.221 đ [simulated]</td>
+              <td class="num"><strong>0,69×</strong></td>
+            </tr>
+            <tr class="danger-row">
+              <td><code>quoc_te</code></td>
+              <td class="num">150</td>
+              <td class="num">27,3%</td>
+              <td class="num">2,32</td>
+              <td class="num">22.515 đ [simulated]</td>
+              <td class="num"><strong>1,88×</strong></td>
+            </tr>
+            <tr>
+              <td><code>doi_tac</code></td>
+              <td class="num">68</td>
+              <td class="num">54,4%</td>
+              <td class="num">1,88</td>
+              <td class="num">10.215 đ [simulated]</td>
+              <td class="num"><strong>0,85×</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="bar-group" style="margin-top: 6px;">
+          <div class="bar-item">
+            <div class="bar-top"><span><code>noi_dia</code> — 2.696 đ [simulated]</span><span>0,22× mốc 12.000 đ</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:12%; background:#16a34a;"></div></div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-top"><span><code>hang_nang</code> — 8.221 đ [simulated]</span><span>0,69× mốc 12.000 đ</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:36.5%; background:#2563eb;"></div></div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-top"><span><code>doi_tac</code> — 10.215 đ [simulated]</span><span>0,85× (sát ngưỡng, điều khoản riêng)</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:45.4%; background:#d97706;"></div></div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-top"><span><code>quoc_te</code> — 22.515 đ [simulated]</span><span>1,88× (ĐẮT GẤP GẦN 2 LẦN NHÂN VIÊN)</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:100%; background:#dc2626;"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Mốc so sánh: nhân viên tự làm = 12.000 đ/yêu cầu (6 phút)</span>
+        <span>Slide 5 / 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: A3 PART 2 -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>5. Nhiệm vụ A3 (tiếp) · Chạy lại tới 3 lần có giúp không?</h2>
+        <span class="tag danger">Loại quoc_te khỏi pilot</span>
+      </div>
+      <div class="content">
+        <div class="two-col">
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Loại yêu cầu</th>
+                  <th class="num">Lần chạy 1 (ok)</th>
+                  <th class="num">Lần chạy 2 (ok)</th>
+                  <th class="num">Lần chạy 3 (ok)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>noi_dia</code></td>
+                  <td class="num">91,0%</td>
+                  <td class="num">75,7%</td>
+                  <td class="num">38,9%</td>
+                </tr>
+                <tr>
+                  <td><code>hang_nang</code></td>
+                  <td class="num">70,9%</td>
+                  <td class="num">39,1%</td>
+                  <td class="num">17,9%</td>
+                </tr>
+                <tr>
+                  <td><code>doi_tac</code></td>
+                  <td class="num">51,5%</td>
+                  <td class="num">18,2%</td>
+                  <td class="num">14,8%</td>
+                </tr>
+                <tr class="danger-row">
+                  <td><code>quoc_te</code></td>
+                  <td class="num">30,0%</td>
+                  <td class="num">11,4%</td>
+                  <td class="num">2,2%</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="callout danger" style="margin-top: 16px;">
+              <strong>Trả lời câu hỏi A3:</strong><br />
+              <code>quoc_te</code> không đáng để trợ lý xử lý (<strong>22.515 đ</strong> = <strong>1,88×</strong> [simulated], thành công chỉ <strong>27,3%</strong>).
+              Chạy lại tới 3 lần <strong>không giúp</strong> vì tỉ lệ <code>ok</code> rơi mạnh: <strong>30,0% → 11,4% → 2,2%</strong>.
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="kpi danger">
+              <div class="k-label">Tỉ lệ ok lần chạy thứ 3 (quoc_te)</div>
+              <div class="k-val">2,2%</div>
+              <div class="k-sub">Lỗi lặp lại trên cùng yêu cầu → đốt chi phí</div>
+            </div>
+            <div class="callout ok">
+              <strong>Đề xuất phạm vi pilot:</strong><br />
+              Chỉ đưa <strong><code>noi_dia</code> + <code>hang_nang</code></strong> (982/1.200 yêu cầu = 81,8% mẫu) vào pilot. Loại <code>quoc_te</code> (lỗ nặng) và <code>doi_tac</code> (sát ngưỡng 0,85×, điều khoản riêng).
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Phân tích tỉ lệ status=ok theo cột attempt trong logix_runs.csv</span>
+        <span>Slide 6 / 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: A4 -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>6. Nhiệm vụ A4 · Tác động của chi phí cố định (40 triệu đ/tháng)</h2>
+        <span class="tag sim">Phạm vi noi_dia + hang_nang · simulated</span>
+      </div>
+      <div class="content">
+        <div class="kpi-row">
+          <div class="kpi">
+            <div class="k-label">CPS biến đổi trong phạm vi pilot</div>
+            <div class="k-val">3.414 đ</div>
+            <div class="k-sub">3.072.513 đ ÷ 900 việc thành công [simulated]</div>
+          </div>
+          <div class="kpi ok">
+            <div class="k-label">Quy mô đầy đủ (45.000 YC/tháng)</div>
+            <div class="k-val">4.599 đ</div>
+            <div class="k-sub">0,38× mốc 12.000 đ [simulated]</div>
+          </div>
+          <div class="kpi warn">
+            <div class="k-label">Một nửa khối lượng (22.500 YC/tháng)</div>
+            <div class="k-val">5.784 đ</div>
+            <div class="k-sub">0,48× mốc 12.000 đ [simulated]</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Khối lượng toàn hệ thống</th>
+              <th class="num">Việc thành công / tháng</th>
+              <th class="num">Cố định / việc</th>
+              <th class="num">CPS + Cố định [simulated]</th>
+              <th class="num">So với 12.000 đ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="highlight">
+              <td>45.000 yêu cầu / tháng (đầy đủ)</td>
+              <td class="num">33.750</td>
+              <td class="num">1.185 đ</td>
+              <td class="num">4.599 đ [simulated]</td>
+              <td class="num"><strong>0,38×</strong></td>
+            </tr>
+            <tr>
+              <td>22.500 yêu cầu / tháng (một nửa)</td>
+              <td class="num">16.875</td>
+              <td class="num">2.370 đ</td>
+              <td class="num">5.784 đ [simulated]</td>
+              <td class="num"><strong>0,48×</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>Kết luận A4:</strong> Ở cả quy mô đầy đủ (<strong>4.599 đ</strong> = 0,38×) lẫn một nửa khối lượng (<strong>5.784 đ</strong> = 0,48×) [simulated], chi phí cố định <strong>chưa làm đổi kết luận</strong> rẻ hơn 12.000 đ; nhưng khi khối lượng giảm một nửa, phần cố định mỗi việc tăng gấp đôi (<strong>1.185 đ → 2.370 đ</strong>).
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Phép kiểm số: 45.000 × (900 ÷ 1.200) = 33.750 việc/tháng; 40.000.000 ÷ 33.750 = 1.185 đ</span>
+        <span>Slide 7 / 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: SUMMARY & GATE -->
+    <section class="slide">
+      <div class="slide-header">
+        <h2>7. Tổng kết Checkpoint 1 &amp; Cổng kiểm tra CP1</h2>
+        <span class="tag ok">ĐẠT 100% · Lệch 0% so với chuẩn</span>
+      </div>
+      <div class="content">
+        <div class="two-col-eq">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <h3 style="font-size:17px; color:var(--primary);">Các kết quả đã chốt ở CP1</h3>
+            <ul class="clean">
+              <li><strong>A1 ĐẠT:</strong> 3 phép thử <code>1,20 · 1,25 · 1,25</code> khớp tuyệt đối giữa tính tay và <code>src/lab13.py</code>.</li>
+              <li><strong>A2:</strong> CPS toàn mẫu = <strong>4.472 đ</strong> [simulated], gấp <strong>16,3×</strong> hoá đơn/yêu cầu; giờ nhân viên chiếm <strong>92,5%</strong>.</li>
+              <li><strong>A3:</strong> Khoanh vùng pilot vào <strong><code>noi_dia</code> + <code>hang_nang</code></strong>; loại <code>quoc_te</code> (<strong>1,88×</strong>, chạy lại không giúp).</li>
+              <li><strong>A4:</strong> Cộng cố định 40 triệu đ/tháng → <strong>4.599 đ</strong> (0,38×) ở quy mô đầy đủ, <strong>5.784 đ</strong> (0,48×) ở nửa khối lượng [simulated].</li>
+            </ul>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <h3 style="font-size:17px; color:var(--ok);">Kiểm tra chéo &amp; Tuân thủ 5 quy tắc</h3>
+            <ul class="clean">
+              <li><strong>Khớp code ↔ bảng:</strong> <code>src/lab13.py</code> trên nhánh <code>main</code> chạy sạch, khớp 100% với <code>report/team/bang_chi_phi.md</code>.</li>
+              <li><strong>Nhãn dữ liệu:</strong> Mọi con số từ cột <code>_simulated</code> đều gắn rõ nhãn <strong>simulated</strong>.</li>
+              <li><strong>Chuẩn trình bày:</strong> Mỗi câu trả lời <strong>≤ 3 dòng</strong>, có số liệu cụ thể, <strong>không dùng từ cấm</strong>.</li>
+              <li><strong>Bước tiếp theo:</strong> Chuyển sang <strong>Checkpoint 2 (Nhiệm vụ B)</strong> — phân tích độ nhạy &amp; kịch bản xem lại 100%.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout ok" style="margin-top: 8px;">
+          <strong>Trạng thái bàn giao CP1:</strong> Đã hoàn tất 1A, 1B, 1C, đồng bộ trên nhánh <code>main</code> và sẵn sàng trình bày / đối chiếu.
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Nhóm 145 · Vai trò 2: Nguyễn Tuấn Dũng (2A202603859)</span>
+        <span>Slide 8 / 8</span>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="controls">
+    <div class="btn-group">
+      <button id="prevBtn" type="button">← Trước</button>
+      <button id="nextBtn" type="button">Tiếp →</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <span id="counter">1 / 8 · Dùng phím ← / → để chuyển slide</span>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const counter = document.getElementById('counter');
+    const progressBar = document.getElementById('progressBar');
+    let current = 0;
+
+    function render() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slides.length - 1;
+      counter.textContent = `${current + 1} / ${slides.length} · Dùng phím ← / → để chuyển slide`;
+      progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (current > 0) { current--; render(); }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (current < slides.length - 1) { current++; render(); }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        if (current < slides.length - 1) { current++; render(); }
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        if (current > 0) { current--; render(); }
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
