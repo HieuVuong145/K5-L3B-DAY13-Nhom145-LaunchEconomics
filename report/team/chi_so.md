@@ -4,13 +4,13 @@
 
 | Loại | Chỉ số | Công thức | Tính thử trên 1.200 yêu cầu |
 | --- | --- | --- | --- |
-| Chính (kết quả) | % yêu cầu đóng trong 24 giờ và không mở lại trong 7 ngày | `dong_trong_24h` bằng 1 và `mo_lai_trong_7_ngay` bằng 0, chia tổng số yêu cầu | ... |
-| Dùng | Tỉ lệ bỏ qua gợi ý | `quyet_dinh_xem_lai` là `sua` hoặc `bo`, chia số yêu cầu được xem lại | ... |
-| An toàn | Tỉ lệ lỗi lọt đến khách | `mo_lai_trong_7_ngay` bằng 1, chia tổng số yêu cầu | ... |
-| Dùng | Nhóm tự đề xuất: ... | ... | Không cần tính |
-| An toàn | Nhóm tự đề xuất: ... | ... | Không cần tính |
+| Chính (kết quả) | % yêu cầu đóng trong 24 giờ và không mở lại trong 7 ngày | `dong_trong_24h == 1` và `mo_lai_trong_7_ngay == 0`, chia tổng số yêu cầu | 82,83% (994/1.200) |
+| Dùng | Tỉ lệ bỏ qua gợi ý | `quyet_dinh_xem_lai` là `sua` hoặc `bo`, chia số yêu cầu được xem lại | 27,12% (48/177) |
+| An toàn | Tỉ lệ lỗi lọt đến khách | `mo_lai_trong_7_ngay == 1`, chia tổng số yêu cầu | 4,25% (51/1.200) |
+| Dùng (đề xuất) | Tỉ lệ kích hoạt trợ lý | Yêu cầu thuộc nhóm can thiệp có `agent_suggestion_shown` / tổng yêu cầu đủ điều kiện được gán vào nhóm can thiệp | Chưa tính được từ mẫu hiện tại; cần ghi event trong pilot |
+| An toàn (đề xuất) | Tỉ lệ hoàn sai tiền trong mẫu kiểm toán | Số mẫu có `so_tien_da_hoan != so_tien_dung` / tổng mẫu đã kiểm tra | Chưa tính được từ mẫu hiện tại; cần event kiểm toán|
 
-Viết "chỉ số trong đợt chạy thử là …", không viết "trợ lý đã nâng chỉ số": đợt chạy thử không có nhóm đối chứng.
+
 
 ## Danh sách event
 
@@ -18,16 +18,22 @@ Viết "chỉ số trong đợt chạy thử là …", không viết "trợ lý 
 
 | Event | Ai tạo | Thuộc tính chính | Thời điểm |
 | --- | --- | --- | --- |
-| ... | ... | ..., trace_id | ... |
-| ... | ... | ..., trace_id | ... |
-| ... | ... | ..., trace_id | ... |
-| ... | ... | ..., trace_id | ... |
-| ... | ... | ..., trace_id | ... |
-| ... | ... | ..., trace_id | ... |
+| `refund_request_created` | App khách hàng | `request_id`, `loai`, `so_tien`, `arm`, `trace_id` | Khi yêu cầu được gửi |
+| `agent_run_completed` | Agent | `request_id`, `attempt`, `tokens_in`, `tokens_out`, `tool_calls`, `status`, `trace_id` | Sau mỗi lần chạy, kể cả lỗi |
+| `agent_suggestion_shown` | Giao diện nhân viên | `request_id`, `staff_id`, `so_tien_de_xuat`, `trace_id` | Khi gợi ý được hiển thị |
+| `staff_review_decision` | Nhân viên | `request_id`, `staff_id`, `quyet_dinh` (`giu/sua/bo`), `phut_xem_lai`, `trace_id` | Khi nhân viên quyết định |
+| `refund_ledger_write` | Sổ cái hoàn tiền | `request_id`, `idempotency_key`, `so_tien`, `ket_qua`, `trace_id` | Khi ghi nhận hoàn tiền |
+| `ticket_closed` | Hệ thống ticket | `request_id`, `closed_at`, `trace_id` | Khi đóng ticket |
+| `ticket_reopened` | Hệ thống ticket | `request_id`, `reopened_at`, `reason`, `trace_id` | Khi ticket được mở lại |
+| `audit_sample_checked` | Kế toán | `request_id`, `so_tien_da_hoan`, `so_tien_dung`, `trace_id` | Khi kiểm tra mẫu định kỳ |
 
 **Kiểm tra chéo:** với mỗi chỉ số ở bảng E1, ghi event dùng để tính. Chỉ số nào không tính được từ danh sách event thì chưa đo được.
 
-- ...
+- Chỉ số chính: `refund_request_created` + `ticket_closed` để tính thời gian đóng; `ticket_reopened` để xác nhận không mở lại trong 7 ngày.
+- Tỉ lệ bỏ qua gợi ý: `staff_review_decision`; tử số là quyết định `sua` hoặc `bo`, mẫu số là các yêu cầu có quyết định xem lại.
+- Tỉ lệ mở lại: `ticket_reopened` trong 7 ngày / `refund_request_created`.
+- Tỉ lệ kích hoạt trợ lý: `agent_suggestion_shown` / yêu cầu được gán `arm=can_thiep` trong `refund_request_created`.
+- Tỉ lệ hoàn sai tiền: so sánh `so_tien_da_hoan` và `so_tien_dung` trong `audit_sample_checked`.
 
 ## E2 · Rủi ro kinh tế
 
