@@ -3,11 +3,11 @@
 # Kiểm tra đọc được: python -c "import yaml; yaml.safe_load(open('../report/team/pilot_plan.yaml'))"
 #
 # D1 · Cỡ mẫu (baseline 0,70; mục tiêu +5 điểm; alpha 0,05; power 0,8; ICC 0,02)
-#   a) Chia theo yêu cầu:
-#   b) Theo nhân viên, m = 75:
-#   c) 20 nhân viên mỗi nhóm:
-#   d) 6 depot mỗi nhóm:
-#   e) Mức chênh 6 điểm (859 mỗi nhóm), 20 nhân viên mỗi nhóm:
+#   a) Chia theo yêu cầu: 1.251 yêu cầu mỗi nhóm (2.502 tổng cộng).
+#   b) Theo nhân viên, m = 75: DE = 1 + 74 × 0,02 = 2,48 → 3.103 yêu cầu hiệu chỉnh/nhóm (~42 nhân viên/nhóm, 84 tổng cộng; vượt quy mô 40 nhân viên hiện có).
+#   c) 20 nhân viên mỗi nhóm: trần cỡ mẫu hiệu dụng c / ICC = 20 / 0,02 = 1.000 < 1.251 → không đạt power 0,8 ở mức +5 điểm dù gom vô hạn yêu cầu.
+#   d) 6 depot mỗi nhóm: trần cỡ mẫu hiệu dụng c / ICC = 6 / 0,02 = 300 << 1.251 → hoàn toàn không đủ lực thống kê.
+#   e) Mức chênh 6 điểm (859 mỗi nhóm), 20 nhân viên mỗi nhóm: kiểm tra tay 20m / (1 + (m − 1) × 0,02) ≥ 859 ⇔ 2,82m ≥ 841,82 ⇔ m ≥ 298,52 → m = 299 yêu cầu/nhân viên; DE = 1 + 298 × 0,02 = 6,96; n hiệu dụng = 20 × 299 / 6,96 ≈ 859,2. Ở bước 20 người cần 8 ngày gom đơn (37–38 đơn/người/ngày × 8 ≈ 300 đơn).
 #
 # D2 · Năm câu kiểm tra "tách được tác động" với cách chia đã chọn (mỗi câu một dòng):
 #   1. Đối chứng chạy cùng thời gian:
@@ -17,8 +17,10 @@
 #   5. Ít nhất 20 cụm mỗi nhóm:
 #
 # Đánh đổi đã chấp nhận (nếu cách chia chưa đạt cả hai điều kiện):
+#   Chọn chia theo nhân viên (20 + 20) và nới MDE từ +5 điểm lên +6 điểm (n = 859/nhóm, m = 299 đơn/người, DE = 6,96, chạy 8 ngày ở bước 20 người) vì trần 20 cụm là 1.000 < 1.251. Chấp nhận đánh đổi: nếu hiệu ứng thật chỉ là +5 điểm thì power giảm từ 0,80 xuống ~0,64 (ghi rõ rủi ro bỏ sót hiệu ứng vừa trong hồ sơ Gate 2a).
 #
 # Tỉ lệ mo_lai_trong_7_ngay hiện tại và ngưỡng an toàn đã chọn:
+#   Hiện tại trong đợt chạy thử: 51/1.200 = 4,25% toàn mẫu; 39/982 = 3,97% trong phạm vi pilot (noi_dia + hang_nang). Ngưỡng dừng an toàn: tắt ngay từ bước 4 người nếu tỉ lệ mở lại > 6% (hoặc có ≥ 1 ca hoàn trùng / báo hoàn sai sổ cái); quy tắc chênh ≥ 2 điểm so với đối chứng chỉ áp dụng từ bước ≥ 10 người.
 
 pilot:
   owner: "?"                      # một người có tên vai trò, không ghi "cả đội"
