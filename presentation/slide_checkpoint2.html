@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 13 · Checkpoint 2 — Bảng độ nhạy và kịch bản vận hành</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --stage: #f4f4f5;
+      --surface: #ffffff;
+      --surface-subtle: #fafafa;
+      --ink: #09090b;
+      --ink-2: #52525b;
+      --ink-3: #a1a1aa;
+      --line: #e4e4e7;
+      --line-soft: #f4f4f5;
+
+      --accent: #18181b;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --blue-line: #bfdbfe;
+
+      --ok: #15803d;
+      --ok-bg: #f0fdf4;
+      --ok-line: #bbf7d0;
+
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --warn-line: #fde68a;
+
+      --danger: #be123c;
+      --danger-bg: #fff1f2;
+      --danger-line: #fecdd3;
+
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--stage);
+      color: var(--ink);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Deck container */
+    .deck {
+      width: min(1160px, 94vw);
+      height: min(670px, 84vh);
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 2px rgba(9, 9, 11, 0.04), 0 18px 40px -20px rgba(9, 9, 11, 0.12);
+      padding: 40px 52px 30px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+      animation: slideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cover Slide — High-contrast Minimal Dark */
+    .slide.cover {
+      background: #09090b;
+      color: #fafafa;
+      border-color: #27272a;
+      padding: 56px 64px 44px;
+      justify-content: space-between;
+    }
+
+    .cover-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #a1a1aa;
+      font-weight: 500;
+    }
+
+    .cover-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cover-dot::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #38bdf8;
+    }
+
+    .cover-main {
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .cover h1 {
+      font-size: clamp(32px, 3.6vw, 46px);
+      font-weight: 700;
+      line-height: 1.14;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+    }
+
+    .cover .subtitle {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #a1a1aa;
+      max-width: 760px;
+      font-weight: 400;
+    }
+
+    .cover .subtitle strong {
+      color: #f4f4f5;
+      font-weight: 500;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #27272a;
+    }
+
+    .meta-item .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #71717a;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .meta-item .val {
+      font-size: 14.5px;
+      font-weight: 500;
+      color: #e4e4e7;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kicker {
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .slide-header h2 {
+      font-size: 23px;
+      font-weight: 650;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    /* Minimal Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--surface-subtle);
+      color: var(--ink-2);
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .badge.ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-line); }
+    .badge.sim, .badge.warn { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-line); }
+    .badge.danger { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-line); }
+    .badge.blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-line); }
+
+    .badge-inline {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-weight: 500;
+      background: var(--warn-bg);
+      color: var(--warn);
+      border: 1px solid var(--warn-line);
+    }
+
+    /* Content Area */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .grid-2-eq {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Stepper */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .step-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink-3);
+    }
+
+    .step-card h3 {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .step-card p {
+      font-size: 13px;
+      color: var(--ink-2);
+      line-height: 1.55;
+    }
+
+    /* KPI Cards */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .kpi {
+      background: var(--surface-subtle);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+
+    .kpi .k-label {
+      font-size: 12px;
+      color: var(--ink-2);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .kpi .k-val {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+
+    .kpi .k-sub {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .kpi.ok .k-val { color: var(--ok); }
+    .kpi.warn .k-val { color: var(--warn); }
+    .kpi.danger .k-val { color: var(--danger); }
+
+    /* Minimal Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    th {
+      font-size: 11.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-3);
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--ink);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td.num, th.num {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+    }
+
+    th.num { font-family: var(--font-sans); font-size: 11.5px; }
+
+    tr.row-em td {
+      background: var(--surface-subtle);
+      font-weight: 600;
+    }
+
+    tr.row-ok td {
+      background: var(--ok-bg);
+      color: var(--ok);
+      font-weight: 600;
+    }
+
+    tr.row-danger td {
+      background: var(--danger-bg);
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .muted { color: var(--ink-2); }
+    .subtle { color: var(--ink-3); font-size: 12px; }
+
+    /* Callouts */
+    .note {
+      background: var(--surface-subtle);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--ink);
+      border-radius: 8px;
+      padding: 13px 16px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: var(--ink-2);
+    }
+
+    .note strong { color: var(--ink); font-weight: 600; }
+    .note.ok { background: var(--ok-bg); border-color: var(--ok-line); border-left-color: var(--ok); }
+    .note.warn { background: var(--warn-bg); border-color: var(--warn-line); border-left-color: var(--warn); }
+    .note.danger { background: var(--danger-bg); border-color: var(--danger-line); border-left-color: var(--danger); }
+
+    /* Formula / Code Block */
+    .formula-box {
+      background: #18181b;
+      color: #e4e4e7;
+      border-radius: 10px;
+      padding: 20px 22px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+      border: 1px solid #27272a;
+    }
+
+    .formula-box .cm { color: #71717a; }
+    .formula-box .hl { color: #38bdf8; font-weight: 600; }
+
+    /* Minimal Bar Charts */
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bar-item .bar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: var(--ink-2);
+    }
+
+    .bar-item .bar-top strong {
+      font-family: var(--font-mono);
+      color: var(--ink);
+      font-size: 12.5px;
+    }
+
+    .bar-track {
+      height: 7px;
+      background: var(--line-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Clean Lists */
+    .list-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-3);
+      margin-bottom: 10px;
+    }
+
+    ul.clean {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      font-size: 13.8px;
+      line-height: 1.55;
+      color: var(--ink-2);
+    }
+
+    ul.clean li {
+      padding-left: 18px;
+      position: relative;
+    }
+
+    ul.clean li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--ink-3);
+    }
+
+    ul.clean.ok li::before { background: var(--ok); }
+    ul.clean strong { color: var(--ink); font-weight: 600; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--line-soft);
+      color: var(--ink);
+      padding: 1.5px 6px;
+      border-radius: 5px;
+      border: 1px solid var(--line);
+    }
+
+    /* Slide Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line-soft);
+      font-size: 12px;
+      color: var(--ink-3);
+    }
+
+    .slide-footer .page-num {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+    }
+
+    /* Bottom Floating Controls */
+    .controls {
+      width: min(1160px, 94vw);
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .ctrl-left, .ctrl-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button {
+      font-family: var(--font-sans);
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 13px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--surface-subtle);
+      border-color: #d4d4d8;
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 22px;
+      height: 5px;
+      border-radius: 999px;
+      background: #d4d4d8;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: background 0.2s, width 0.2s;
+    }
+
+    .dot:hover { background: #a1a1aa; }
+    .dot.active { background: var(--ink); width: 36px; }
+
+    .hint {
+      font-size: 12px;
+      color: var(--ink-3);
+      font-family: var(--font-mono);
+    }
+
+    @media (max-width: 860px) {
+      .slide { padding: 24px 24px 20px; }
+      .slide.cover { padding: 32px 28px; }
+      .steps, .kpi-row, .grid-2, .grid-2-eq, .meta-grid { grid-template-columns: 1fr; }
+      .hint { display: none; }
+    }
+
+    @media print {
+      @page { size: landscape; margin: 10mm; }
+      body { background: #fff; height: auto; overflow: visible; display: block; }
+      .controls { display: none; }
+      .deck { width: 100%; height: auto; }
+      .slide {
+        position: static;
+        display: flex !important;
+        box-shadow: none;
+        border: 1px solid var(--line);
+        page-break-after: always;
+        margin-bottom: 16px;
+        height: 670px;
+      }
+      .slide.cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide cover active">
+      <div class="cover-top">
+        <span class="cover-dot">AI20K K5 · Lab 13 · Launch &amp; Economics (Gate 2a)</span>
+        <span>Checkpoint 2 · Nhiệm vụ B</span>
+      </div>
+
+      <div class="cover-main">
+        <h1>Bảng độ nhạy &amp; Kịch bản vận hành</h1>
+        <p class="subtitle">
+          Kiểm tra độ bền kinh tế của trợ lý hoàn phí LogiX-VN dưới 9 kịch bản đơn, 1 kịch bản cặp, giới hạn số lần chạy và kịch bản xem lại 100%:
+          <strong>Yếu tố nào kéo chi phí mạnh nhất và pilot phải đo gì?</strong>
+        </p>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="label">Nhóm &amp; Lớp</div>
+          <div class="val">Nhóm 145 · Lớp K5-L3B</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">Vai trò 2 · Người kiểm số</div>
+          <div class="val">Nguyễn Tuấn Dũng (2A202603859)</div>
+        </div>
+        <div class="meta-item">
+          <div class="label">Sản phẩm kiểm chứng</div>
+          <div class="val">src/lab13.py &amp; report/team/bang_chi_phi.md</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: WORKFLOW & RULES -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="title-group">
+          <span class="kicker">01 · Quy trình &amp; Nguyên tắc</span>
+          <h2>Triển khai Checkpoint 2 (B1 → B4)</h2>
+        </div>
+        <span class="badge">Mốc gốc A2: 4.472 đ [simulated]</span>
+      </div>
+
+      <div class="content">
+        <div class="steps">
+          <div class="step-card">
+            <span class="step-num">01 · B1</span>
+            <h3>Đổi từng yếu tố</h3>
+            <p>Gọi lại <code>mo_hinh()</code> cho 9 kịch bản đơn (token, xem lại, làm lại, lương +25%, giới hạn 1–2 lần chạy).</p>
+          </div>
+          <div class="step-card">
+            <span class="step-num">02 · B2</span>
+            <h3>Đổi cặp &amp; Xếp hạng</h3>
+            <p>Chạy kịch bản kết hợp <code>token ×2</code> + <code>xem lại ×2</code> và xếp hạng 3 yếu tố tác động lớn nhất.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-num">03 · B3</span>
+            <h3>Chi phí cả hệ thống</h3>
+            <p>Cộng thêm <code>12.000 đ</code> cho mỗi yêu cầu không thành công để tìm giới hạn chạy rẻ nhất cho toàn công ty.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-num">04 · B4</span>
+            <h3>Xem lại 100%</h3>
+            <p>Kiểm tra phạm vi <code>noi_dia + hang_nang</code> ở hai mức phút làm lại (9 phút &amp; 15,3 phút) và tìm ngưỡng hoà vốn.</p>
+          </div>
+        </div>
+
+        <div class="grid-2-eq">
+          <div class="note">
+            <strong>Quy tắc kiểm số ở B1–B3</strong><br />
+            • Mỗi kịch bản <em>giảm một nửa</em> phải giảm đúng bằng nửa mức tăng của kịch bản <em>gấp đôi</em> tương ứng.<br />
+            • Với <code>max_lan_chay</code>: bỏ <code>attempt &gt; k</code>; yêu cầu vượt giới hạn gán <code>chuyen_nhan_vien</code> và đặt phút simulated = <code>0</code>.
+          </div>
+          <div class="note warn">
+            <strong>Mốc so sánh gốc từ A2 (simulated)</strong><br />
+            • Tổng chi phí trợ lý: <strong>4.373.585 đ</strong> · Việc thành công: <strong>978</strong>.<br />
+            • Chi phí mỗi việc thành công (CPS): <strong>4.472 đ</strong> [simulated].<br />
+            • Mốc nhân viên tự làm: <strong>12.000 đ/yêu cầu</strong> (6 phút).
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Lab 13 · Nhóm 145 (K5-L3B)</span>
+        <span class="page-num">02 / 08</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: B1 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="title-group">
+          <span class="kicker">02 · Nhiệm vụ B1</span>
+          <h2>Bảng độ nhạy 9 kịch bản đổi từng yếu tố</h2>
+        </div>
+        <span class="badge sim">CPS: simulated</span>
+      </div>
+
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th>Kịch bản</th>
+              <th>Cách tính tham số</th>
+              <th class="num">CPS [simulated]</th>
+              <th class="num">Thay đổi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Giá token gấp đôi</td>
+              <td class="muted">52 đ và 260 đ / 1.000 token (tool giữ nguyên)</td>
+              <td class="num">4.723 đ</td>
+              <td class="num">+5,6%</td>
+            </tr>
+            <tr>
+              <td>Giá token giảm một nửa</td>
+              <td class="muted">13 đ và 65 đ / 1.000 token</td>
+              <td class="num">4.346 đ</td>
+              <td class="num">−2,8%</td>
+            </tr>
+            <tr class="row-em">
+              <td>Tỉ lệ xem lại gấp đôi</td>
+              <td class="muted">Tiền xem lại × 2</td>
+              <td class="num">6.292 đ</td>
+              <td class="num" style="color:var(--warn);">+40,7%</td>
+            </tr>
+            <tr>
+              <td>Tỉ lệ xem lại giảm một nửa</td>
+              <td class="muted">Tiền xem lại ÷ 2</td>
+              <td class="num">3.562 đ</td>
+              <td class="num">−20,3%</td>
+            </tr>
+            <tr class="row-danger">
+              <td>Số ca làm lại gấp đôi</td>
+              <td>Tiền làm lại × 2</td>
+              <td class="num">6.787 đ</td>
+              <td class="num">+51,8%</td>
+            </tr>
+            <tr>
+              <td>Số ca làm lại giảm một nửa</td>
+              <td class="muted">Tiền làm lại ÷ 2</td>
+              <td class="num">3.315 đ</td>
+              <td class="num">−25,9%</td>
+            </tr>
+            <tr>
+              <td>Lương nhân viên tăng 25%</td>
+              <td class="muted">2.500 đ / phút</td>
+              <td class="num">5.506 đ</td>
+              <td class="num">+23,1%</td>
+            </tr>
+            <tr>
+              <td>Chỉ cho chạy tối đa 2 lần</td>
+              <td class="muted">Bỏ attempt &gt; 2; vượt giới hạn → chuyen_nhan_vien</td>
+              <td class="num">4.237 đ</td>
+              <td class="num">−5,2%</td>
+            </tr>
+            <tr>
+              <td>Chỉ cho chạy 1 lần</td>
+              <td class="muted">Như trên với giới hạn 1</td>
+              <td class="num">4.111 đ</td>
+              <td class="num">−8,1%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note ok">
+          <strong>Tự kiểm tra tính nhất quán đạt 100%:</strong> Mức giảm khi chia đôi luôn bằng đúng một nửa mức tăng khi gấp đôi (<code>+5,6% / −2,8%</code> · <code>+40,7% / −20,3%</code> · <code>+51,8% / −25,9%</code>).
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Đối chiếu: src/lab13.py &amp; report/team/bang_chi_phi.md (Mục B1)</span>
+        <span class="page-num">03 / 08</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: B2 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="title-group">
+          <span class="kicker">03 · Nhiệm vụ B2</span>
+          <h2>Đổi một cặp &amp; Xếp hạng yếu tố ảnh hưởng</h2>
+        </div>
+        <span class="badge sim">Mô hình cộng tuyến tính · simulated</span>
+      </div>
+
+      <div class="content">
+        <div class="grid-2">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="list-title">Biên độ tăng CPS theo từng yếu tố [simulated]</div>
+            <div class="bar-group">
+              <div class="bar-item">
+                <div class="bar-top"><span>1. Số ca làm lại gấp đôi (6.787 đ)</span><strong style="color:var(--danger);">+51,8%</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--danger);"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>2. Tỉ lệ xem lại gấp đôi (6.292 đ)</span><strong style="color:var(--warn);">+40,7%</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:78.6%; background:var(--warn);"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>3. Lương nhân viên tăng 25% (5.506 đ)</span><strong>+23,1%</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:44.6%; background:var(--ink);"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>4. Giá token gấp đôi (4.723 đ)</span><strong style="color:var(--blue);">+5,6%</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:10.8%; background:var(--blue);"></div></div>
+              </div>
+            </div>
+
+            <div class="note">
+              <strong>Hàm ý quản trị:</strong> Giá token tăng gấp đôi chỉ làm CPS tăng <strong>+5,6%</strong>, trong khi số ca làm lại gấp đôi kéo CPS tăng <strong>+51,8%</strong> [simulated]. Pilot phải tối ưu <strong>tỉ lệ làm lại &amp; xem lại</strong> trước khi tối ưu giá API.
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="kpi warn">
+              <div class="k-label">Kịch bản cặp: Token ×2 + Xem lại ×2</div>
+              <div class="k-val">6.543 đ</div>
+              <div class="k-sub">+46,3% so với gốc 4.472 đ [simulated]</div>
+            </div>
+
+            <div class="formula-box">
+              <span class="cm"># Kiểm tra tính cộng tuyến tính</span><br />
+              Δ(Token ×2)   = <span class="hl">+5,6%</span><br />
+              Δ(Xem lại ×2) = <span class="hl">+40,7%</span><br />
+              Tổng 2 tác động = <span class="hl">+46,3%</span><br /><br />
+              <span class="cm"># Xếp hạng Top 3:</span><br />
+              1. Số ca làm lại  (+51,8%)<br />
+              2. Tỉ lệ xem lại  (+40,7%)<br />
+              3. Lương nhân viên (+23,1%)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Hàm kiểm chứng: mo_hinh(runs, reqs, gia_vao=52, gia_ra=260, he_so_xem_lai=2)</span>
+        <span class="page-num">04 / 08</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: B3 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="title-group">
+          <span class="kicker">04 · Nhiệm vụ B3</span>
+          <h2>Giới hạn chạy lại có thật sự rẻ hơn cho công ty?</h2>
+        </div>
+        <span class="badge ok">Tối ưu công ty: 2 lần chạy</span>
+      </div>
+
+      <div class="content">
+        <table>
+          <thead>
+            <tr>
+              <th>Giới hạn chạy</th>
+              <th class="num">Tổng trợ lý [simulated]</th>
+              <th class="num">YC không thành công</th>
+              <th class="num">Chi phí cả hệ thống [simulated]</th>
+              <th class="num">CPS [simulated]</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>1 lần</code></td>
+              <td class="num">3.621.781 đ</td>
+              <td class="num">319</td>
+              <td class="num">7.449.781 đ</td>
+              <td class="num"><strong>4.111 đ</strong> <span class="subtle">(thấp nhất)</span></td>
+            </tr>
+            <tr class="row-ok">
+              <td><code>2 lần</code></td>
+              <td class="num">4.093.220 đ</td>
+              <td class="num">234</td>
+              <td class="num">6.901.220 đ (rẻ nhất)</td>
+              <td class="num">4.237 đ</td>
+            </tr>
+            <tr>
+              <td><code>3 lần</code></td>
+              <td class="num">4.373.585 đ</td>
+              <td class="num">222</td>
+              <td class="num">7.037.585 đ</td>
+              <td class="num">4.472 đ</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="grid-2-eq">
+          <div class="note ok">
+            <strong>Trả lời câu hỏi B3:</strong><br />
+            Giới hạn <strong>2 lần</strong> rẻ nhất cho cả công ty (<strong>6.901.220 đ</strong> [simulated]), <strong>không trùng</strong> với giới hạn cho CPS thấp nhất (<strong>1 lần</strong>, <strong>4.111 đ</strong> [simulated]).
+          </div>
+          <div class="note warn">
+            <strong>Vì sao tối ưu riêng CPS bị lệch?</strong><br />
+            Cắt xuống 1 lần giúp CPS trông đẹp hơn nhưng đẩy thêm <strong>85 yêu cầu</strong> (<code>234 → 319</code>) sang nhân viên tự làm (tốn <code>12.000 đ/ca</code>), làm tổng chi phí cả hệ thống tăng thêm <strong>548.561 đ</strong> [simulated].
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Công thức: Chi phí cả hệ thống = Tổng chi phí trợ lý + 12.000 đ × Số yêu cầu không thành công</span>
+        <span class="page-num">05 / 08</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: B4 PART 1 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="title-group">
+          <span class="kicker">05 · Nhiệm vụ B4</span>
+          <h2>Nếu bắt buộc xem lại 100% (phạm vi noi_dia + hang_nang)</h2>
+        </div>
+        <span class="badge danger">Xem lại chiếm ~90% chi phí · simulated</span>
+      </div>
+
+      <div class="content">
+        <div class="kpi-row">
+          <div class="kpi warn">
+            <div class="k-label">Giả định 9 phút / ca làm lại</div>
+            <div class="k-val">11.743 đ</div>
+            <div class="k-sub">0,98× mốc 12.000 đ [simulated]</div>
+          </div>
+          <div class="kpi danger">
+            <div class="k-label">Thực tế 15,3 phút / ca (trung bình)</div>
+            <div class="k-val">12.415 đ</div>
+            <div class="k-sub">1,03× — đắt hơn nhân viên tự làm [simulated]</div>
+          </div>
+          <div class="kpi">
+            <div class="k-label">Tiền xem lại 100% (948 ca × 5 phút)</div>
+            <div class="k-val">9.480.000 đ</div>
+            <div class="k-sub">Chiếm ~90% tổng chi phí [simulated]</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Khoản chi phí (982 YC · 900 việc thành công)</th>
+              <th class="num">Mức 9 phút làm lại</th>
+              <th class="num">Mức 15,3 phút thực tế</th>
+              <th>Nhãn</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Token + Tool (mọi lần chạy)</td>
+              <td class="num">224.513 đ</td>
+              <td class="num">224.513 đ</td>
+              <td class="subtle">đo từ trace</td>
+            </tr>
+            <tr>
+              <td>Xem lại 100% (948 ca có status=ok × 5 phút × 2.000 đ)</td>
+              <td class="num">9.480.000 đ</td>
+              <td class="num">9.480.000 đ</td>
+              <td><span class="badge-inline">simulated</span></td>
+            </tr>
+            <tr>
+              <td>Làm lại (48 ca lam_lai × phút/ca × 2.000 đ)</td>
+              <td class="num">864.000 đ</td>
+              <td class="num">1.468.800 đ</td>
+              <td><span class="badge-inline">simulated</span></td>
+            </tr>
+            <tr class="row-em">
+              <td>Tổng chi phí ÷ 900 việc thành công</td>
+              <td class="num">11.743 đ (0,98×)</td>
+              <td class="num" style="color:var(--danger);">12.415 đ (1,03×)</td>
+              <td><span class="badge-inline">simulated</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="slide-footer">
+        <span>Độ nhạy phút làm lại: đề giả định 9 phút, nhưng trung bình cột phut_lam_lai_simulated thực tế là 15,3 phút (trung vị 14,5)</span>
+        <span class="page-num">06 / 08</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: B4 PART 2 -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="title-group">
+          <span class="kicker">06 · Nhiệm vụ B4 (tiếp)</span>
+          <h2>Ngưỡng hoà vốn &amp; Điều pilot phải học được</h2>
+        </div>
+        <span class="badge warn">Hoà vốn: ≤ 4,8 – 5,1 phút / lần xem lại</span>
+      </div>
+
+      <div class="content">
+        <div class="grid-2">
+          <div style="display:flex; flex-direction:column; gap:18px;">
+            <div class="bar-group">
+              <div class="bar-item">
+                <div class="bar-top"><span>CPS hiện tại trong phạm vi pilot (A4 biến đổi)</span><strong style="color:var(--ok);">3.414 đ (0,28×)</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:27.5%; background:var(--ok);"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Xem lại 100% — làm lại 9 phút [simulated]</span><strong style="color:var(--warn);">11.743 đ (0,98×)</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:94.6%; background:var(--warn);"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Mốc nhân viên tự làm (6 phút)</span><strong>12.000 đ (1,00×)</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:96.7%; background:var(--ink);"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Xem lại 100% — làm lại 15,3 phút [simulated]</span><strong style="color:var(--danger);">12.415 đ (1,03×)</strong></div>
+                <div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--danger);"></div></div>
+              </div>
+            </div>
+
+            <div class="note danger">
+              <strong>Kết luận B4:</strong> Nếu duy trì xem lại 100% ở mức 5 phút/ca, trợ lý hầu như không tiết kiệm (hoặc lỗ <strong>+3%</strong> ở mức làm lại thực tế 15,3 phút [simulated]).
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="formula-box">
+              <span class="cm"># Ngưỡng phút xem lại hoà vốn (12.000 đ)</span><br />
+              Làm lại 9 phút/ca:    <span class="hl">≤ 5,1 phút/ca</span><br />
+              Làm lại 15,3 phút/ca: <span class="hl">≤ 4,8 phút/ca</span>
+            </div>
+
+            <div class="note ok">
+              <strong>Hai mục tiêu pilot bắt buộc phải đo:</strong><br />
+              1. <strong>Tỉ lệ xem lại tối thiểu an toàn:</strong> Có thể giảm từ 100% xuống mức nào mà không làm tăng ca sai tiền / mở lại?<br />
+              2. <strong>Thời gian mỗi lần xem lại:</strong> Có rút được xuống dưới <strong>4,8–5,1 phút</strong> nhờ giao diện duyệt nhanh không?
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Phạm vi tính: noi_dia + hang_nang (982 yêu cầu, 900 thành công, 948 có status=ok, 48 ca lam_lai)</span>
+        <span class="page-num">07 / 08</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: SUMMARY & GATE -->
+    <section class="slide">
+      <div class="slide-header">
+        <div class="title-group">
+          <span class="kicker">07 · Tổng kết &amp; Cổng kiểm tra</span>
+          <h2>Chốt Checkpoint 2 &amp; Tuân thủ quy tắc</h2>
+        </div>
+        <span class="badge ok">ĐẠT 100% · Lệch 0% so với chuẩn</span>
+      </div>
+
+      <div class="content">
+        <div class="grid-2-eq">
+          <div>
+            <div class="list-title">Các kết quả đã chốt ở CP2</div>
+            <ul class="clean">
+              <li><strong>B1:</strong> Đủ 9 kịch bản đơn; đạt tự kiểm tra tuyến tính (giảm nửa = nửa mức tăng gấp đôi).</li>
+              <li><strong>B2:</strong> Kịch bản cặp <strong>6.543 đ (+46,3%)</strong> [simulated]; top 3 yếu tố: <strong>làm lại → xem lại → lương</strong>.</li>
+              <li><strong>B3:</strong> Giới hạn <strong>2 lần</strong> rẻ nhất cả hệ thống (<strong>6.901.220 đ</strong> [simulated]), không trùng CPS thấp nhất (1 lần).</li>
+              <li><strong>B4:</strong> Xem lại 100% tốn <strong>11.743 đ</strong> (0,98×) đến <strong>12.415 đ</strong> (1,03×) [simulated]; hoà vốn <strong>≤ 4,8–5,1 phút/ca</strong>.</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="list-title">Kiểm tra chéo &amp; Tuân thủ 5 quy tắc</div>
+            <ul class="clean ok">
+              <li><strong>Khớp code ↔ bảng:</strong> <code>src/lab13.py</code> chạy sạch trên <code>main</code>, khớp 100% với <code>report/team/bang_chi_phi.md</code>.</li>
+              <li><strong>Nhãn dữ liệu:</strong> Mọi con số từ cột <code>_simulated</code> đều gắn rõ nhãn <strong>simulated</strong>.</li>
+              <li><strong>Chuẩn trình bày:</strong> Mỗi câu trả lời <strong>≤ 3 dòng</strong>, có số liệu cụ thể, <strong>không dùng từ cấm</strong>.</li>
+              <li><strong>Bước tiếp theo:</strong> Đồng bộ <strong>CP3 (Bảng lỗi)</strong> và chuyển sang <strong>CP4 (<code>pilot_plan.yaml</code>)</strong>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note ok" style="margin-top: auto;">
+          <strong>Trạng thái bàn giao CP2:</strong> Vai trò 2 đã hoàn tất toàn bộ Nhiệm vụ A &amp; B trong <code>report/team/bang_chi_phi.md</code>, đồng bộ trên nhánh <code>main</code>.
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <span>Nhóm 145 · Vai trò 2: Nguyễn Tuấn Dũng (2A202603859)</span>
+        <span class="page-num">08 / 08</span>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MINIMAL CONTROLS -->
+  <div class="controls">
+    <div class="ctrl-left">
+      <button id="prevBtn" type="button" aria-label="Slide trước">← Trước</button>
+      <button id="nextBtn" type="button" aria-label="Slide tiếp theo">Tiếp →</button>
+    </div>
+
+    <div class="dots" id="dots" role="tablist" aria-label="Chọn slide"></div>
+
+    <div class="ctrl-right">
+      <span class="hint" id="counter">1 / 8</span>
+      <button id="fsBtn" type="button" title="Toàn màn hình (F)">⛶</button>
+    </div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const fsBtn = document.getElementById('fsBtn');
+    const counter = document.getElementById('counter');
+    const dotsWrap = document.getElementById('dots');
+    let current = 0;
+
+    // Build clickable progress dots
+    const dots = slides.map((_, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'dot';
+      btn.setAttribute('aria-label', `Đi tới slide ${idx + 1}`);
+      btn.addEventListener('click', () => goTo(idx));
+      dotsWrap.appendChild(btn);
+      return btn;
+    });
+
+    function goTo(index) {
+      if (index < 0 || index >= slides.length) return;
+      current = index;
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slides.length - 1;
+      counter.textContent = `${current + 1} / ${slides.length}`;
+    }
+
+    prevBtn.addEventListener('click', () => goTo(current - 1));
+    nextBtn.addEventListener('click', () => goTo(current + 1));
+
+    fsBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        goTo(current + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        goTo(current - 1);
+      } else if (e.key === 'Home') {
+        goTo(0);
+      } else if (e.key === 'End') {
+        goTo(slides.length - 1);
+      } else if (e.key.toLowerCase() === 'f') {
+        fsBtn.click();
+      } else if (e.key >= '1' && e.key <= String(slides.length)) {
+        goTo(Number(e.key) - 1);
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(dx) > 45) {
+        goTo(dx < 0 ? current + 1 : current - 1);
+      }
+    }, { passive: true });
+
+    goTo(0);
+  </script>
+</body>
+</html>
