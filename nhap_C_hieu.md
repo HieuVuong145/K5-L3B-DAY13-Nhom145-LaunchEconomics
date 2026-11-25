@@ -21,7 +21,7 @@ Nhãn người 1: Ngầm · Nhãn người 2: Hệ thống · **Nhãn thống nh
 
 Một câu, gồm: nhãn chọn và nhãn loại · dấu hiệu quyết định trong mô tả ca · vì sao điều gây lẫn không đổi nhãn. Viết bằng lời của mình (hội đồng có thể hỏi).
 
-- Ca 8: ...
+- Ca 8: Chọn **Hệ thống** và loại **Ngầm** vì trợ lý bịa trích dẫn "Điều 7.2" không có trong chính sách và lỗi đã lộ ra trực tiếp trong câu trả lời cho người đọc thấy; việc số tiền hoàn vẫn đúng không đổi nhãn thành Ngầm vì lỗi không hề ẩn tới lúc kiểm tra mẫu.
 
 ## Bước 9 · Bảng khắc phục, ca 11 và ca 17
 
@@ -32,5 +32,6 @@ Yêu cầu rubric C3: "Phát hiện bằng gì" phải **đo được** (tên ev
 
 | Ca | Loại lỗi | Phát hiện bằng gì | Khắc phục thế nào | Ai phụ trách |
 | --: | --- | --- | --- | --- |
-| 11 | Giới hạn hệ thống | ... | ... | ... |
-| 17 | Ngầm | ... | ... | ... |
+| 11 | Giới hạn hệ thống | Event `unsupported_input_type` (audio) / `handoff_to_staff`; cảnh báo hàng tuần khi vượt 3% tổng yêu cầu | Hiển thị hướng dẫn rõ ràng kèm nút chuyển sang nhập chữ hoặc chuyển nhân viên; cân nhắc tích hợp speech-to-text nếu tỉ lệ vượt ngưỡng | PM trợ lý hoàn phí |
+| 17 | Ngầm | Kiểm tra mẫu ngẫu nhiên 100 đơn/tuần đối chiếu với bảng giá hiện hành; cảnh báo khi vượt 1% đơn lệch giá | Xoá bộ nhớ đệm ngay khi cập nhật bảng giá mới và ghi phiên bản bảng giá vào `trace_id` của mỗi lần chạy để đối soát | Kế toán trưởng |
+
