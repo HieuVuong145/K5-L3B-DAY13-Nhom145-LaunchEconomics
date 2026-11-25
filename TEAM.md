@@ -12,7 +12,7 @@
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 |        |      |       |        |         |
-|   2 | Nguyễn Tuấn Dũng | 2A202603859 | | | Người kiểm số |
+|   2 | Nguyễn Tuấn Dũng | 2A202603859 | 26ai.dungnt16@vinuni.edu.vn | | Người kiểm số |
 |   3 | Nguyễn Lê Đăng Khoa | 2A202603847 | nguyenledangkhoa1510@gmail.com | S0ra1n0 | Người gắn nhãn 1 |
 |   4 |        |      |       |        |         |
 

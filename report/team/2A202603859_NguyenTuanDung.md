@@ -4,7 +4,7 @@
 
 - Họ tên: Nguyễn Tuấn Dũng
 - MSSV: 2A202603859
-- Email: *(cập nhật nếu cần)*
+- Email: 26ai.dungnt16@vinuni.edu.vn
 - Vai trong nhóm: Người kiểm số (Vai trò 2)
 
 ## 2. Phần việc phụ trách
