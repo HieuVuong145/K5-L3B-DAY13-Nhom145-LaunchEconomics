@@ -10,7 +10,7 @@
 | Dùng (đề xuất) | Tỉ lệ kích hoạt trợ lý | Yêu cầu thuộc nhóm can thiệp có `agent_suggestion_shown` / tổng yêu cầu đủ điều kiện được gán vào nhóm can thiệp | Chưa tính được từ mẫu hiện tại; cần ghi event trong pilot |
 | An toàn (đề xuất) | Tỉ lệ hoàn sai tiền trong mẫu kiểm toán | Số mẫu có `so_tien_da_hoan != so_tien_dung` / tổng mẫu đã kiểm tra | Chưa tính được từ mẫu hiện tại; cần event kiểm toán|
 
-Viết "chỉ số trong đợt chạy thử là …", không viết "trợ lý đã nâng chỉ số": đợt chạy thử không có nhóm đối chứng.
+
 
 ## Danh sách event
 
