@@ -13,7 +13,7 @@
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 |        |      |       |        |         |
 |   2 | Nguyễn Tuấn Dũng | 2A202603859 | | | Người kiểm số |
-|   3 |        |      |       |        |         |
+|   3 | Nguyễn Lê Đăng Khoa | 2A202603847 | nguyenledangkhoa1510@gmail.com | S0ra1n0 | Người gắn nhãn 1 |
 |   4 |        |      |       |        |         |
 
 Bốn vai của lab:
