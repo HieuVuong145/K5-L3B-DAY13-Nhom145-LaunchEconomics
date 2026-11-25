@@ -8,7 +8,7 @@
 | Vai trò | Thành viên phụ trách | Nhiệm vụ | File làm việc chính | Điểm Rubric liên quan |
 | --- | --- | --- | --- | --- |
 | **Vai trò 1: Người viết code** | *(Điền tên)* | A, B | `src/lab13.py` | C1 (20đ), C2 (15đ) |
-| **Vai trò 2: Người kiểm số** | *(Điền tên)* | A, B | `report/team/bang_chi_phi.md` | C1 (20đ), C2 (15đ) |
+| **Vai trò 2: Người kiểm số** | Nguyễn Tuấn Dũng (`2A202603859`) | A, B | `report/team/bang_chi_phi.md` | C1 (20đ), C2 (15đ) |
 | **Vai trò 3: Người gắn nhãn 1** | *(Điền tên)* | C | `docs/Ngay13_Lab13_De_bai_hoc_vien.docx`, `report/team/bang_loi.md` | C3 (10đ) |
 | **Vai trò 4: Người gắn nhãn 2 (kiêm giữ hồ sơ)** | *(Điền tên)* | C | `docs/Ngay13_Lab13_De_bai_hoc_vien.docx`, `report/team/bang_loi.md` | C3 (10đ) |
 
