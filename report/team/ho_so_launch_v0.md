@@ -14,6 +14,8 @@ Nhóm: 145 · Lớp: L3B
 | 6 · Pilot plan | 20+20 nhân viên (`noi_dia` + `hang_nang`); MDE +6đ (`n=859`, `m=299`, `DE=6,96`, ~10 ngày; power ~0,64 ở +5đ); 3 luật dừng | Xong, có bằng chứng | Giám đốc vận hành LogiX-VN |
 | 7 · Rủi ro kinh tế | Làm lại ×2: +51,8% (6.787 đ); xem lại 100%: 11.743–12.415 đ (0,98–1,03×); giảm nửa khối lượng: cố định +2.370 đ (simulated) | Giả lập | PM trợ lý hoàn phí |
 
-**Đề xuất:** Go · Go có điều kiện · No-go (giữ một). Go có điều kiện: ghi từng điều kiện, người phụ trách, ngày kiểm tra. No-go: ghi việc phải làm để quay lại cổng.
+**Đề xuất:** Go có điều kiện
 
-- ...
+- Hoàn thiện khoá chống trùng và đối soát sổ cái (ca 7, 20) trước khi bật pilot — **Kỹ sư trưởng agent** (kiểm tra `2026-12-04`).
+- Phê duyệt phạm vi thu hẹp (`noi_dia` + `hang_nang`, loại `quoc_te` `1,88×` và `doi_tac` `0,85×`) cùng đánh đổi MDE `+6` điểm (`power ~0,64` nếu hiệu ứng thật chỉ `+5` điểm; bước 20 người chạy 10 ngày) — **Giám đốc vận hành LogiX-VN** (kiểm tra `2026-12-04`).
+- Bật đủ 8 event có `trace_id`, thay phút `_simulated` bằng thời gian đo thật sau tuần 1 và đặt lộ trình giảm tỉ lệ xem lại theo bậc (tránh xem lại 100% làm chi phí lên `11.743–12.415 đ`, `simulated`) — **PM trợ lý hoàn phí** (kiểm tra `2026-12-14`).
