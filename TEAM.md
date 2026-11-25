@@ -13,7 +13,7 @@
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 |        |      |       |        |         |
 |   2 | Nguyễn Tuấn Dũng | 2A202603859 | 26ai.dungnt16@vinuni.edu.vn | | Người kiểm số |
-|   3 | Nguyễn Lê Đăng Khoa | 2A202603847 | nguyenledangkhoa1510@gmail.com | S0ra1n0 | Người gắn nhãn 1 |
+|   3 | Nguyễn Lê Đăng Khoa | 2A202603847 | 26ai.khoanld@vinuni.edu.vn | S0ra1n0 | Người gắn nhãn 1 |
 |   4 | Vương Toàn Minh Hiếu | 2A202603853 | 26ai.hieuvtm@vinuni.edu.vn | HieuVuong145 | Người gắn nhãn 2, kiêm giữ hồ sơ |
 
 Bốn vai của lab:

@@ -18,7 +18,7 @@ Báo cáo ngắn, tối đa 2 trang. Số liệu chi tiết nằm trong các fil
 - **Nhiệm vụ A & B (Mô hình chi phí & độ nhạy):** Cài đặt hàm `mo_hinh` và các kịch bản trong [src/lab13.py](../../src/lab13.py), đối chiếu tính tay và tổng hợp bảng A1–A4, B1–B4 trong [bang_chi_phi.md](bang_chi_phi.md).
 - **Nhiệm vụ C (Phân loại lỗi & khắc phục):** Hai người gắn nhãn độc lập 20 ca lỗi theo 5 loại Google PAIR, thống nhất ca lệch và lập bảng khắc phục 5 ca có event, ngưỡng, tần suất và vai trò phụ trách trong [bang_loi.md](bang_loi.md).
 - **Nhiệm vụ D (Kế hoạch pilot):** Tính 5 câu cỡ mẫu D1, kiểm tra 5 câu tách tác động D2, đặt 3 luật dừng 4 vế trong [pilot_plan.yaml](pilot_plan.yaml).
-- **Nhiệm vụ E (Chỉ số, rủi ro & hồ sơ launch v0):** Tính 3 chỉ số E1, thiết kế 12 event có `trace_id`, phân tích 3 rủi ro kinh tế E2 trong [chi_so.md](chi_so.md) và tổng hợp thành 1 trang tại [ho_so_launch_v0.md](ho_so_launch_v0.md).
+- **Nhiệm vụ E (Chỉ số, rủi ro & hồ sơ launch v0):** Tính thử 3 chỉ số E1 (chính, dùng, an toàn) và đề xuất thêm 2 chỉ số (tỉ lệ kích hoạt trợ lý, tỉ lệ hoàn sai tiền trong mẫu kiểm toán), thiết kế 12 event có `trace_id`, phân tích 3 rủi ro kinh tế E2 trong [chi_so.md](chi_so.md) và tổng hợp thành 1 trang tại [ho_so_launch_v0.md](ho_so_launch_v0.md).
 - **Duyệt chéo Gate 2a:** Chấm hồ sơ của `Nhom1234` theo 3 tiêu chí tại [phieu_cham.md](phieu_cham.md).
 
 ## 4. Kết quả
@@ -35,11 +35,19 @@ Báo cáo ngắn, tối đa 2 trang. Số liệu chi tiết nằm trong các fil
 
 - **Không đủ mẫu ở mức +5 điểm với 40 nhân viên:** Trần `20 / 0,02 = 1.000 < 1.251`, nên nhóm nới MDE lên `+6` điểm (`n = 859`, `m = 299`) và ghi rõ rủi ro `power ~0,64` nếu hiệu ứng thật chỉ `+5` điểm.
 - **Lệch nhịp gom đơn và lịch theo dõi 7 ngày:** Do phạm vi `noi_dia + hang_nang` chiếm `81,8%` (`≈ 30,7` đơn/người/ngày), nhóm điều chỉnh bước 20 người lên khoảng `10` ngày và lùi `decision_date` sang `2027-01-12` để đủ 7 ngày theo dõi mở lại.
-- **Nguy cơ xung đột Git khi làm song song:** Tách file nháp theo nhánh riêng trước khi người phụ trách chính gộp vào file chung.
+- **Nguy cơ xung đột Git khi làm song song:** Mỗi thành viên làm trên nhánh riêng và gộp về `main` qua pull request; mỗi file chung có một người phụ trách chính. Khi hai người cùng cần sửa một file (ví dụ `bang_loi.md` ở CP3), người thứ hai ghi phần của mình vào file nháp riêng, người phụ trách gộp vào file chung rồi xoá nháp. Trước khi sửa, mỗi người pull `main` mới nhất.
+- **Nhãn lệch ở ca 6 và ca 8:** Hai người gắn nhãn độc lập rồi mới so; với hai ca lệch, nhóm thống nhất theo nguyên nhân gốc (ca 6 Do người dùng, ca 8 Hệ thống) và viết quy tắc phân biệt cho từng ca trong `bang_loi.md`, không sửa bộ nhãn độc lập đã commit.
 
 ## 6. Tổng hợp đóng góp
 
-Chi tiết đóng góp của từng thành viên nằm trong [TEAM.md](../../TEAM.md).
+| Vai trò | Thành viên | Phần việc chính |
+| --- | --- | --- |
+| 1 · Người viết code | `ngdinhtruong28` | Viết `src/lab13.py` (Nhiệm vụ A, B); E1 và danh sách event trong `chi_so.md` |
+| 2 · Người kiểm số | Nguyễn Tuấn Dũng | Tính tay đối chiếu và điền `bang_chi_phi.md` (A, B); kiểm tra cỡ mẫu D1 trong `pilot_plan.yaml`; E2 trong `chi_so.md`; slide thuyết trình |
+| 3 · Người gắn nhãn 1 | Nguyễn Lê Đăng Khoa | Gắn nhãn và tổng hợp `bang_loi.md` (C); D2, luật dừng trong `pilot_plan.yaml` (D); kiểm tra chéo event trong `chi_so.md` (E) |
+| 4 · Người gắn nhãn 2, kiêm giữ hồ sơ | Vương Toàn Minh Hiếu | Gắn nhãn độc lập (C); `ho_so_launch_v0.md`; chấm chéo `Nhom1234` trong `phieu_cham.md`; điều phối và merge PR |
+
+Chi tiết đóng góp và commit bằng chứng của từng thành viên nằm trong [TEAM.md](../../TEAM.md) và các báo cáo cá nhân `report/team/MSSV_HoTen.md`.
 
 ## 7. Hạn chế và hướng cải thiện
 
