@@ -50,3 +50,22 @@ Sao chép mục dưới đây cho từng thành viên.
 ### Bằng chứng
 
 -
+
+## NguyenLeDangKhoa-2A202603847
+
+### Phần việc phụ trách
+
+- Người gắn nhãn 1 (Vai trò 3): Nhiệm vụ C (gắn nhãn độc lập 20 ca, so nhãn, bảng khắc phục, tổng hợp `report/team/bang_loi.md`).
+- Nhiệm vụ D: 5 câu D2, 3 luật dừng và các trường trong `report/team/pilot_plan.yaml`; rà điều kiện "Xong khi" của CP4.
+- Nhiệm vụ E: kiểm tra chéo bảng E1 với danh sách event trong `report/team/chi_so.md`; checklist chấm chéo Gate 2a; rà hồ sơ trước khi nộp.
+
+### Đóng góp cụ thể
+
+- Bộ nhãn độc lập 20 ca; đồng thuận 18/20 = 90%; bảng khắc phục 5 ca đủ 5 loại (gộp phần của Người gắn nhãn 2).
+- `pilot_plan.yaml` đọc được bằng `yaml.safe_load`, không còn `?`, 3 luật dừng đủ 4 vế; sửa bước 20 người từ 8 ngày thành khoảng 10 ngày và `decision_date` sang 2027-01-12 (đủ 7 ngày theo dõi mở lại).
+- Thêm 4 event để mọi chỉ số và luật dừng tính được từ event (12 event có `trace_id`); bỏ từ bị cấm trong `phieu_cham.md`; sửa cách ghi chi phí cố định và người phụ trách trong `ho_so_launch_v0.md`.
+
+### Bằng chứng
+
+- Commit `fa188c6`, `2f27609`, `0283228`, `e906381`, `b80dd4c`, `6211a64`, `ed8a1b5`.
+- Báo cáo cá nhân: `report/team/2A202603847_NguyenLeDangKhoa.md`.
